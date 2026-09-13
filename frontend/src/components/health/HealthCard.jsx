@@ -1,11 +1,19 @@
 import React from 'react';
-import { Server, Database, Cpu, Clock, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
-import { StatusBadge } from '../common/StatusBadge';
+import { Server, Database, Cpu, Clock, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import { formatUptime, formatTime } from '../../utils/formatters';
+import { useToast } from '../../context/NotificationContext';
 
 export const HealthCard = ({ health, loading, error, lastChecked, onRefresh }) => {
+  const toast = useToast();
   const isHealthy = health && health.status === 'UP';
   const isDbHealthy = health?.database?.connected;
+
+  const handleRefresh = async () => {
+    if (onRefresh) {
+      await onRefresh();
+      toast.success('System health refreshed successfully.', 'Health Check');
+    }
+  };
 
   return (
     <div className="card">
@@ -21,11 +29,11 @@ export const HealthCard = ({ health, loading, error, lastChecked, onRefresh }) =
         </div>
         <div>
           {loading ? (
-            <StatusBadge status="Checking..." variant="warning" />
+            <span className="badge badge-warning">Checking…</span>
           ) : isHealthy ? (
-            <StatusBadge status="API Healthy" variant="success" />
+            <span className="badge badge-success">API Healthy</span>
           ) : (
-            <StatusBadge status="Unreachable" variant="danger" />
+            <span className="badge badge-danger">Unreachable</span>
           )}
         </div>
       </div>
@@ -33,65 +41,60 @@ export const HealthCard = ({ health, loading, error, lastChecked, onRefresh }) =
       {error ? (
         <div style={{
           padding: '1rem',
-          backgroundColor: '#fee2e2',
+          backgroundColor: 'var(--danger-light)',
           border: '1px solid #fca5a5',
-          borderRadius: '8px',
-          color: '#991b1b',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--danger-dark)',
           fontSize: '0.875rem',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           gap: '0.5rem',
         }}>
-          <XCircle size={18} />
+          <XCircle size={18} style={{ marginTop: '2px', flexShrink: 0 }} />
           <div>
             <strong>Connection Failed:</strong> {error}
-            <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
-              Ensure the backend server is running on <code>http://localhost:5000</code>
+            <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.85 }}>
+              Ensure the backend server is running on <code style={{ fontFamily: 'monospace' }}>http://localhost:5000</code>
             </div>
           </div>
         </div>
       ) : (
         <div className="diagnostic-list">
           <div className="diagnostic-item">
-            <span className="diagnostic-label">
-              <Server size={16} /> API Server
+            <span className="diagnostic-label"><Server size={14} /> API System</span>
+            <span className="diagnostic-value">{health?.system || '—'} v{health?.version || '—'}</span>
+          </div>
+
+          <div className="diagnostic-item">
+            <span className="diagnostic-label"><Database size={14} /> MongoDB Atlas</span>
+            <span
+              className="diagnostic-value"
+              style={{ color: isDbHealthy ? 'var(--success-600)' : 'var(--danger-600)' }}
+            >
+              {isDbHealthy
+                ? `Connected (${health?.database?.name})`
+                : 'Disconnected'}
             </span>
+          </div>
+
+          <div className="diagnostic-item">
+            <span className="diagnostic-label"><Cpu size={14} /> Memory</span>
             <span className="diagnostic-value">
-              {health?.system || 'CarePulse HMS Backend'} (v{health?.version || '1.0.0'})
+              {health?.memoryUsageMb
+                ? `${health.memoryUsageMb.heapUsed} / ${health.memoryUsageMb.heapTotal} MB`
+                : '—'}
             </span>
           </div>
 
           <div className="diagnostic-item">
-            <span className="diagnostic-label">
-              <Database size={16} /> MongoDB Atlas
-            </span>
-            <span className="diagnostic-value" style={{ color: isDbHealthy ? '#059669' : '#dc2626' }}>
-              {isDbHealthy ? `Connected (${health?.database?.name})` : 'Disconnected'}
-            </span>
-          </div>
-
-          <div className="diagnostic-item">
-            <span className="diagnostic-label">
-              <Cpu size={16} /> Memory Usage
-            </span>
+            <span className="diagnostic-label"><Clock size={14} /> Uptime</span>
             <span className="diagnostic-value">
-              {health?.memoryUsageMb ? `${health.memoryUsageMb.heapUsed} MB / ${health.memoryUsageMb.heapTotal} MB` : 'N/A'}
+              {health ? formatUptime(health.uptimeSeconds) : '—'}
             </span>
           </div>
 
           <div className="diagnostic-item">
-            <span className="diagnostic-label">
-              <Clock size={16} /> Server Uptime
-            </span>
-            <span className="diagnostic-value">
-              {health ? formatUptime(health.uptimeSeconds) : 'N/A'}
-            </span>
-          </div>
-
-          <div className="diagnostic-item">
-            <span className="diagnostic-label">
-              <CheckCircle2 size={16} /> Last Verified
-            </span>
+            <span className="diagnostic-label"><CheckCircle2 size={14} /> Last Verified</span>
             <span className="diagnostic-value">
               {lastChecked ? formatTime(lastChecked) : 'Just now'}
             </span>
@@ -99,14 +102,18 @@ export const HealthCard = ({ health, loading, error, lastChecked, onRefresh }) =
         </div>
       )}
 
-      <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
-        <button 
-          className="btn btn-primary" 
-          onClick={onRefresh} 
+      <div style={{ marginTop: '1.25rem' }}>
+        <button
+          className="btn btn-primary"
+          onClick={handleRefresh}
           disabled={loading}
           style={{ width: '100%' }}
         >
-          {loading ? 'Verifying Endpoints...' : 'Ping /api/health Now'}
+          {loading ? (
+            <><span className="spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }} /> Pinging…</>
+          ) : (
+            <><RefreshCw size={14} /> Ping /api/health</>
+          )}
         </button>
       </div>
     </div>

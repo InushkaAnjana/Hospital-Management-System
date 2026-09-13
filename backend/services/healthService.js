@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
+const env = require('../config/env');
 
 /**
  * Health check service providing system diagnostics
  */
-const getSystemHealth = async () => {
+const getSystemHealth = async (verbose = false) => {
   const dbState = mongoose.connection.readyState;
   const dbStatusMap = {
     0: 'Disconnected',
@@ -12,15 +13,17 @@ const getSystemHealth = async () => {
     3: 'Disconnecting',
   };
 
-  return {
-    status: 'UP',
+  const isDbConnected = dbState === 1;
+
+  const healthData = {
+    status: isDbConnected ? 'UP' : 'DEGRADED',
     system: 'Hospital Management System API',
     version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
+    environment: env.nodeEnv,
     uptimeSeconds: Math.floor(process.uptime()),
     database: {
       status: dbStatusMap[dbState] || 'Unknown',
-      connected: dbState === 1,
+      connected: isDbConnected,
       host: mongoose.connection.host || 'N/A',
       name: mongoose.connection.name || 'N/A',
     },
@@ -30,6 +33,17 @@ const getSystemHealth = async () => {
       heapUsed: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
     },
   };
+
+  if (verbose) {
+    healthData.diagnostics = {
+      nodeVersion: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      pid: process.pid,
+    };
+  }
+
+  return healthData;
 };
 
 module.exports = {

@@ -136,10 +136,50 @@ const deleteMedicine = async (req, res, next) => {
   }
 };
 
+/**
+ * Get Medicine Inventory Statistics
+ * GET /api/medicines/stats
+ */
+const getMedicineStats = async (req, res, next) => {
+  try {
+    const sixtyDaysLater = new Date();
+    sixtyDaysLater.setDate(sixtyDaysLater.getDate() + 60);
+
+    const [total, lowStock, outOfStock, expiringSoon, valueAgg] = await Promise.all([
+      Medicine.countDocuments(),
+      Medicine.countDocuments({ status: 'Low Stock' }),
+      Medicine.countDocuments({ status: 'Out of Stock' }),
+      Medicine.countDocuments({ expiryDate: { $lte: sixtyDaysLater } }),
+      Medicine.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalValue: { $sum: { $multiply: ['$stockQuantity', '$unitPrice'] } },
+            totalUnits: { $sum: '$stockQuantity' },
+          },
+        },
+      ]),
+    ]);
+
+    return sendSuccess(res, 'Medicine statistics retrieved', {
+      total,
+      lowStock,
+      outOfStock,
+      expiringSoon,
+      totalInventoryValue: valueAgg[0]?.totalValue || 0,
+      totalUnits: valueAgg[0]?.totalUnits || 0,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMedicines,
   getMedicineById,
   createMedicine,
   updateMedicine,
   deleteMedicine,
+  getMedicineStats,
 };
+

@@ -21,4 +21,8 @@ export const medicineService = {
     const res = await api.delete(`/medicines/${id}`);
     return res.data;
   },
+  getStats: async () => {
+    const res = await api.get('/medicines/stats');
+    return res.data;
+  },
 };

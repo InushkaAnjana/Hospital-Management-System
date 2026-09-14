@@ -1,53 +1,134 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import {
   Users, Calendar, Bed, FlaskConical, Pill, Receipt,
-  Activity, ArrowUpRight, Plus, CheckCircle, Database
+  Activity, ArrowUpRight, Plus, CheckCircle, Database, RefreshCw
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { HealthCard } from '../components/health/HealthCard';
 import { DataTable } from '../components/common/DataTable';
 import { useToast } from '../context/NotificationContext';
+import { dashboardService } from '../services/dashboardService';
 
 export const DashboardPage = () => {
-  const { health, loading, error, lastChecked, refetch } = useOutletContext();
+  const { health, loading: healthLoading, error, lastChecked, refetch } = useOutletContext();
   const toast = useToast();
 
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      const res = await dashboardService.getStats();
+      setDashboardData(res.data || res);
+    } catch (err) {
+      toast.error('Unable to fetch live dashboard metrics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const kpisData = dashboardData?.kpis || {};
+
   const kpis = [
-    { label: 'Total Registered Patients', value: '1,420', icon: Users, color: '#0284c7', bg: '#e0f2fe' },
-    { label: "Today's Appointments", value: '38', icon: Calendar, color: '#6366f1', bg: '#e0e7ff' },
-    { label: 'Admitted Inpatients (IPD)', value: '64 / 80 Beds', icon: Bed, color: '#10b981', bg: '#d1fae5' },
-    { label: 'Pending Lab Tests', value: '14 Orders', icon: FlaskConical, color: '#f59e0b', bg: '#fef3c7' },
-    { label: 'Low Stock Medicines', value: '3 Alerts', icon: Pill, color: '#ef4444', bg: '#fee2e2' },
-    { label: "Today's Revenue", value: '$4,850.00', icon: Receipt, color: '#059669', bg: '#d1fae5' },
+    {
+      label: 'Total Registered Patients',
+      value: kpisData.totalPatients !== undefined ? `${kpisData.totalPatients}` : '...',
+      icon: Users,
+      color: '#0284c7',
+      bg: '#e0f2fe',
+    },
+    {
+      label: "Today's Appointments",
+      value: kpisData.todayAppointments !== undefined ? `${kpisData.todayAppointments}` : '...',
+      icon: Calendar,
+      color: '#6366f1',
+      bg: '#e0e7ff',
+    },
+    {
+      label: 'Admitted Inpatients (IPD)',
+      value: kpisData.admittedPatients !== undefined ? `${kpisData.admittedPatients} / 80 Beds` : '...',
+      icon: Bed,
+      color: '#10b981',
+      bg: '#d1fae5',
+    },
+    {
+      label: 'Pending Lab Tests',
+      value: kpisData.pendingLabTests !== undefined ? `${kpisData.pendingLabTests} Orders` : '...',
+      icon: FlaskConical,
+      color: '#f59e0b',
+      bg: '#fef3c7',
+    },
+    {
+      label: 'Low Stock Medicines',
+      value: kpisData.lowStockMedicines !== undefined ? `${kpisData.lowStockMedicines} Alerts` : '...',
+      icon: Pill,
+      color: '#ef4444',
+      bg: '#fee2e2',
+    },
+    {
+      label: "Today's Revenue",
+      value: kpisData.todayRevenue !== undefined ? `$${Number(kpisData.todayRevenue).toFixed(2)}` : '...',
+      icon: Receipt,
+      color: '#059669',
+      bg: '#d1fae5',
+    },
   ];
 
   const recentActivities = [
-    { id: 'ACT-101', patient: 'Eleanor Vance', service: 'Cardiology Consultation', doctor: 'Dr. Robert Smith', status: 'Completed', time: '10 mins ago' },
-    { id: 'ACT-102', patient: 'Arthur Pendelton', service: 'Complete Blood Count (CBC)', doctor: 'Dr. Jane Miller', status: 'In Lab', time: '25 mins ago' },
-    { id: 'ACT-103', patient: 'Clara Oswald', service: 'Amoxicillin 500mg Dispensing', doctor: 'Dr. Robert Smith', status: 'Dispensed', time: '42 mins ago' },
-    { id: 'ACT-104', patient: 'David Tennant', service: 'IPD Ward Admission (Room 302)', doctor: 'Dr. Alan Grant', status: 'Admitted', time: '1 hour ago' },
+    ...(dashboardData?.recentAppointments?.map((a) => ({
+      id: a.appointmentNumber || 'APP',
+      patient: a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : 'Patient',
+      service: a.reason || 'Clinical Consultation',
+      doctor: a.doctor?.name ? `Dr. ${a.doctor.name}` : 'Consultant',
+      status: a.status || 'Scheduled',
+      time: 'Consultation',
+    })) || []),
+    ...(dashboardData?.recentInvoices?.map((inv) => ({
+      id: inv.invoiceNumber,
+      patient: inv.patient ? `${inv.patient.firstName} ${inv.patient.lastName}` : 'Billed Patient',
+      service: `Hospital Invoice ($${Number(inv.totalAmount).toFixed(2)})`,
+      doctor: 'Accounts Desk',
+      status: inv.paymentStatus,
+      time: new Date(inv.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    })) || []),
+    ...(dashboardData?.recentAdmissions?.map((adm) => ({
+      id: adm.admissionNumber,
+      patient: adm.patient ? `${adm.patient.firstName} ${adm.patient.lastName}` : 'Inpatient',
+      service: `Ward Admission (${adm.ward} - ${adm.bedNumber})`,
+      doctor: adm.doctor?.name ? `Dr. ${adm.doctor.name}` : 'Attending',
+      status: adm.status,
+      time: new Date(adm.admissionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    })) || []),
   ];
 
   const activityColumns = [
-    { key: 'id', label: 'Reference ID', width: '120px' },
+    { key: 'id', label: 'Reference ID', width: '130px', render: (r) => <strong>{r.id}</strong> },
     { key: 'patient', label: 'Patient Name', render: (row) => <strong>{row.patient}</strong> },
     { key: 'service', label: 'Service / Procedure' },
-    { key: 'doctor', label: 'Attending Doctor' },
+    { key: 'doctor', label: 'Attending / Department' },
     {
       key: 'status',
       label: 'Status',
       render: (row) => {
         const variants = {
           Completed: 'badge-success',
+          Paid: 'badge-success',
           'In Lab': 'badge-warning',
-          Dispensed: 'badge-primary',
-          Admitted: 'badge-neutral',
+          'Partially Paid': 'badge-warning',
+          Scheduled: 'badge-primary',
+          Admitted: 'badge-primary',
+          Unpaid: 'badge-danger',
         };
-        return <span className={`badge ${variants[row.status] || 'badge-primary'}`}>{row.status}</span>;
+        return <span className={`badge ${variants[row.status] || 'badge-neutral'}`}>{row.status}</span>;
       },
     },
-    { key: 'time', label: 'Timestamp', align: 'right' },
+    { key: 'time', label: 'Reference Time', align: 'right' },
   ];
 
   return (
@@ -55,15 +136,16 @@ export const DashboardPage = () => {
       {/* Page Header */}
       <PageHeader
         title="Hospital Executive Dashboard"
-        subtitle="Operational overview, real-time clinical workload, and system diagnostics."
+        subtitle="Operational overview, real-time clinical workload, and live hospital telemetry."
         icon={Activity}
         badge="Live System"
         actions={
           <button
-            className="btn btn-primary btn-sm"
-            onClick={() => toast.success('Triggered system sync with MongoDB Atlas.')}
+            className="btn btn-outline btn-sm"
+            onClick={fetchDashboardStats}
+            title="Refresh Metrics"
           >
-            <Plus size={15} /> Quick Action
+            <RefreshCw size={14} /> Refresh Data
           </button>
         }
       />
@@ -90,7 +172,7 @@ export const DashboardPage = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
         <HealthCard
           health={health}
-          loading={loading}
+          loading={healthLoading}
           error={error}
           lastChecked={lastChecked}
           onRefresh={refetch}
@@ -104,43 +186,39 @@ export const DashboardPage = () => {
                   <CheckCircle size={22} />
                 </div>
                 <div>
-                  <h3 className="card-title">Frontend Foundation Status</h3>
-                  <p className="card-subtitle">Architecture & Component Health</p>
+                  <h3 className="card-title">Hospital System Modules</h3>
+                  <p className="card-subtitle">Operational Core Architecture</p>
                 </div>
               </div>
-              <span className="badge badge-success">Ready</span>
+              <span className="badge badge-success">Online</span>
             </div>
 
             <div className="diagnostic-list">
               <div className="diagnostic-item">
-                <span className="diagnostic-label">Sidebar & Navigation</span>
-                <span className="diagnostic-value">14 Registered Modules</span>
+                <span className="diagnostic-label">Medical Specialists</span>
+                <span className="diagnostic-value">{kpisData.totalDoctors || 0} Registered Doctors</span>
               </div>
               <div className="diagnostic-item">
-                <span className="diagnostic-label">UI Design System</span>
-                <span className="diagnostic-value">CSS Design Tokens Active</span>
+                <span className="diagnostic-label">Hospital Staff</span>
+                <span className="diagnostic-value">{kpisData.totalStaff || 0} Active Personnel</span>
               </div>
               <div className="diagnostic-item">
-                <span className="diagnostic-label">Notification System</span>
-                <span className="diagnostic-value">Toast Context Operational</span>
+                <span className="diagnostic-label">Pathology & Diagnostics</span>
+                <span className="diagnostic-value">Real-time Result Verification</span>
               </div>
               <div className="diagnostic-item">
-                <span className="diagnostic-label">Reusable Elements</span>
-                <span className="diagnostic-value">Header, Table, Form, Modal</span>
+                <span className="diagnostic-label">Pharmacy & Dispensing</span>
+                <span className="diagnostic-value">Auto-Inventory Deduction Active</span>
               </div>
             </div>
           </div>
 
           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem' }}>
-            <button
-              className="btn btn-outline"
-              style={{ flex: 1 }}
-              onClick={() => toast.info('Toast notification system verified!')}
-            >
-              Test Notification
-            </button>
+            <Link to="/reports" className="btn btn-outline" style={{ flex: 1, textAlign: 'center' }}>
+              Operational Reports
+            </Link>
             <Link to="/patients" className="btn btn-primary" style={{ flex: 1, textAlign: 'center' }}>
-              Explore Modules <ArrowUpRight size={15} />
+              Manage Patients <ArrowUpRight size={15} />
             </Link>
           </div>
         </div>
@@ -149,15 +227,18 @@ export const DashboardPage = () => {
       {/* Recent Activity Table */}
       <div>
         <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.875rem' }}>
-          Recent Hospital Transactions
+          Real-Time Hospital Activities & Clinical Events
         </h3>
         <DataTable
           columns={activityColumns}
           data={recentActivities}
-          searchPlaceholder="Search recent activities..."
+          searchPlaceholder="Search recent events..."
           emptyTitle="No Recent Activities"
+          emptyMessage="No clinical appointments, invoices, or admissions recorded today."
         />
       </div>
     </div>
   );
 };
+
+export default DashboardPage;

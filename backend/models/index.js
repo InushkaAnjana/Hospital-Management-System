@@ -1,9 +1,20 @@
-/**
- * Models Index
- * In subsequent phases, models for Users, Patients, Doctors, Appointments,
- * EMR, Prescriptions, Lab, Pharmacy, Billing, Staff, etc. will be exported from here.
- */
+const { User, USER_ROLES } = require('./User');
+const Department = require('./Department');
+const Doctor = require('./Doctor');
+const Patient = require('./Patient');
+const Appointment = require('./Appointment');
+const MedicalRecord = require('./MedicalRecord');
+const Medicine = require('./Medicine');
+const Prescription = require('./Prescription');
 
 module.exports = {
-  // Model exports will be registered here as modules are implemented
+  User,
+  USER_ROLES,
+  Department,
+  Doctor,
+  Patient,
+  Appointment,
+  MedicalRecord,
+  Medicine,
+  Prescription,
 };

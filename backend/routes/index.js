@@ -10,6 +10,13 @@ const appointmentRoutes = require('./appointmentRoutes');
 const medicalRecordRoutes = require('./medicalRecordRoutes');
 const medicineRoutes = require('./medicineRoutes');
 const prescriptionRoutes = require('./prescriptionRoutes');
+const labRoutes = require('./labRoutes');
+const billingRoutes = require('./billingRoutes');
+const admissionRoutes = require('./admissionRoutes');
+const staffRoutes = require('./staffRoutes');
+const dashboardRoutes = require('./dashboardRoutes');
+const reportRoutes = require('./reportRoutes');
+const auditRoutes = require('./auditRoutes');
 
 /**
  * Main API Route Registry
@@ -23,5 +30,12 @@ router.use('/appointments', appointmentRoutes);
 router.use('/medical-records', medicalRecordRoutes);
 router.use('/medicines', medicineRoutes);
 router.use('/prescriptions', prescriptionRoutes);
+router.use('/lab', labRoutes);
+router.use('/billing', billingRoutes);
+router.use('/admissions', admissionRoutes);
+router.use('/staff', staffRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/reports', reportRoutes);
+router.use('/audit-logs', auditRoutes);
 
 module.exports = router;

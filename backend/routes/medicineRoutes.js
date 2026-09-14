@@ -5,6 +5,13 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 router.use(authenticate);
 
+// Stats route
+router.get(
+  '/stats',
+  authorize('Administrator', 'Pharmacist', 'Doctor'),
+  medicineController.getMedicineStats
+);
+
 // View medicines: Doctors (to prescribe), Pharmacists, Nurses, Admin
 router.get(
   '/',

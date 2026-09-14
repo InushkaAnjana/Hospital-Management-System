@@ -14,16 +14,14 @@ import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
 import { MedicalRecordsPage } from '../pages/records/MedicalRecordsPage';
 import { PrescriptionsPage } from '../pages/prescriptions/PrescriptionsPage';
 
-// Modular supporting pages
-import {
-  LaboratoryPage,
-  PharmacyPage,
-  BillingPage,
-  AdmissionsPage,
-  StaffPage,
-  ReportsPage,
-  AuditLogsPage,
-} from '../pages/modules';
+// Fully implemented HMS module pages
+import { LaboratoryPage } from '../pages/laboratory/LaboratoryPage';
+import { PharmacyPage } from '../pages/pharmacy/PharmacyPage';
+import { BillingPage } from '../pages/billing/BillingPage';
+import { AdmissionsPage } from '../pages/admissions/AdmissionsPage';
+import { StaffPage } from '../pages/staff/StaffPage';
+import { ReportsPage } from '../pages/reports/ReportsPage';
+import { AuditLogsPage } from '../pages/audit/AuditLogsPage';
 
 export const AppRoutes = () => {
   return (
@@ -105,7 +103,7 @@ export const AppRoutes = () => {
         <Route
           path="laboratory"
           element={
-            <ProtectedRoute allowedRoles={['Administrator', 'Laboratory Staff', 'Doctor']}>
+            <ProtectedRoute allowedRoles={['Administrator', 'Laboratory Staff', 'Doctor', 'Nurse']}>
               <LaboratoryPage />
             </ProtectedRoute>
           }
@@ -123,7 +121,7 @@ export const AppRoutes = () => {
         <Route
           path="billing"
           element={
-            <ProtectedRoute allowedRoles={['Administrator', 'Accountant']}>
+            <ProtectedRoute allowedRoles={['Administrator', 'Accountant', 'Receptionist']}>
               <BillingPage />
             </ProtectedRoute>
           }
@@ -139,7 +137,7 @@ export const AppRoutes = () => {
         <Route
           path="reports"
           element={
-            <ProtectedRoute allowedRoles={['Administrator', 'Accountant', 'Doctor']}>
+            <ProtectedRoute allowedRoles={['Administrator', 'Accountant', 'Doctor', 'Pharmacist', 'Laboratory Staff', 'Receptionist']}>
               <ReportsPage />
             </ProtectedRoute>
           }

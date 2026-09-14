@@ -39,14 +39,14 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onCloseMo
       items: [
         { label: 'Doctors', path: '/doctors', icon: Stethoscope, roles: ['Administrator', 'Doctor', 'Receptionist', 'Nurse'] },
         { label: 'Departments', path: '/departments', icon: Building2, roles: ['Administrator', 'Doctor', 'Receptionist'] },
-        { label: 'Billing & Invoices', path: '/billing', icon: Receipt, roles: ['Administrator', 'Accountant'] },
+        { label: 'Billing & Invoices', path: '/billing', icon: Receipt, roles: ['Administrator', 'Accountant', 'Receptionist'] },
         { label: 'Staff Management', path: '/staff', icon: UserPlus, roles: ['Administrator'] },
       ],
     },
     {
       title: 'Administration',
       items: [
-        { label: 'Reports & Analytics', path: '/reports', icon: BarChart3, roles: ['Administrator', 'Accountant', 'Doctor'] },
+        { label: 'Reports & Analytics', path: '/reports', icon: BarChart3, roles: ['Administrator', 'Accountant', 'Doctor', 'Pharmacist', 'Laboratory Staff', 'Receptionist'] },
         { label: 'Audit Logs', path: '/audit-logs', icon: ShieldCheck, roles: ['Administrator'] },
       ],
     },

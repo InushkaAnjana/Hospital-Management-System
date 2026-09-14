@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 import {
   Activity, LayoutDashboard, Users, UserPlus, Building2,
   Calendar, FileText, FlaskConical, Pill, Receipt,
-  Bed, ShieldCheck, BarChart3, ChevronLeft, ChevronRight, Stethoscope
+  Bed, ShieldCheck, BarChart3, ChevronLeft, ChevronRight, Stethoscope,
+  UserCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -46,7 +47,8 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onCloseMo
     {
       title: 'Administration',
       items: [
-        { label: 'Reports & Analytics', path: '/reports', icon: BarChart3, roles: ['Administrator', 'Accountant', 'Doctor', 'Pharmacist', 'Laboratory Staff', 'Receptionist'] },
+        { label: 'User Provisioning', path: '/users', icon: UserCheck, roles: ['Administrator'] },
+        { label: 'Reports & Analytics', path: '/reports', icon: BarChart3, roles: ['Administrator'] },
         { label: 'Audit Logs', path: '/audit-logs', icon: ShieldCheck, roles: ['Administrator'] },
       ],
     },

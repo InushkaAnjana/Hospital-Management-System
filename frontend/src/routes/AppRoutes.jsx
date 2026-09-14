@@ -22,6 +22,7 @@ import { AdmissionsPage } from '../pages/admissions/AdmissionsPage';
 import { StaffPage } from '../pages/staff/StaffPage';
 import { ReportsPage } from '../pages/reports/ReportsPage';
 import { AuditLogsPage } from '../pages/audit/AuditLogsPage';
+import { UsersPage } from '../pages/admin/UsersPage';
 
 export const AppRoutes = () => {
   return (
@@ -147,6 +148,14 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={['Administrator']}>
               <AuditLogsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <ProtectedRoute allowedRoles={['Administrator']}>
+              <UsersPage />
             </ProtectedRoute>
           }
         />

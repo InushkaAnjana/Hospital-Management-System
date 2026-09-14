@@ -138,7 +138,7 @@ export const AppRoutes = () => {
         <Route
           path="reports"
           element={
-            <ProtectedRoute allowedRoles={['Administrator', 'Accountant', 'Doctor', 'Pharmacist', 'Laboratory Staff', 'Receptionist']}>
+            <ProtectedRoute allowedRoles={['Administrator']}>
               <ReportsPage />
             </ProtectedRoute>
           }

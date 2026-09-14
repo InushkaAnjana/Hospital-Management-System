@@ -48,7 +48,7 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onCloseMo
       title: 'Administration',
       items: [
         { label: 'User Provisioning', path: '/users', icon: UserCheck, roles: ['Administrator'] },
-        { label: 'Reports & Analytics', path: '/reports', icon: BarChart3, roles: ['Administrator', 'Accountant', 'Doctor', 'Pharmacist', 'Laboratory Staff', 'Receptionist'] },
+        { label: 'Reports & Analytics', path: '/reports', icon: BarChart3, roles: ['Administrator'] },
         { label: 'Audit Logs', path: '/audit-logs', icon: ShieldCheck, roles: ['Administrator'] },
       ],
     },

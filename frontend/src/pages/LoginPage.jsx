@@ -11,8 +11,8 @@ export const LoginPage = () => {
   const { login } = useAuth();
   const toast = useToast();
 
-  const [email, setEmail] = useState('admin@hospital.org');
-  const [password, setPassword] = useState('Admin@12345');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState(USER_ROLES.ADMINISTRATOR);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

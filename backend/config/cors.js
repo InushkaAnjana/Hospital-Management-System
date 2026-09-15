@@ -9,16 +9,19 @@ const corsOptions = {
     if (!origin) return callback(null, true);
 
     const allowedOrigins = env.cors.origin;
+    const cleanOrigin = origin.replace(/\/+$/, '');
 
     // Check if origin is explicitly in allowed list or matches localhost in development
     const isAllowed =
       allowedOrigins.includes(origin) ||
+      allowedOrigins.includes(cleanOrigin) ||
+      allowedOrigins.includes('*') ||
       (env.isDevelopment && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin));
 
     if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS Error: Origin '${origin}' not allowed by policy`));
+      callback(new Error(`CORS Error: Origin '${origin}' not allowed by policy. Allowed: ${allowedOrigins.join(', ')}`));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -1,11 +1,23 @@
 import axios from 'axios';
 
 /**
+ * Determine API Base URL from environment variables:
+ * Supports VITE_API_URL (e.g. Render backend URL) and VITE_API_BASE_URL,
+ * with automatic /api suffix normalization and fallback to '/api' for Vite dev proxy.
+ */
+const resolveApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) return '/api';
+  const cleanUrl = envUrl.trim().replace(/\/+$/, '');
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
+/**
  * Global Axios API Client
  */
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 10000,
+  baseURL: resolveApiBaseUrl(),
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },

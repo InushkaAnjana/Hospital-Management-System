@@ -54,7 +54,7 @@ export const HealthCard = ({ health, loading, error, lastChecked, onRefresh }) =
           <div>
             <strong>Connection Failed:</strong> {error}
             <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.85 }}>
-              Ensure the backend server is running on <code style={{ fontFamily: 'monospace' }}>http://localhost:5000</code>
+              Please verify that the backend API service is running and accessible.
             </div>
           </div>
         </div>

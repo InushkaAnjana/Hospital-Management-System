@@ -21,7 +21,7 @@ const startServer = async () => {
       console.log(`[Server] HMS Backend listening on port ${env.port}`);
       console.log(`[Server] Active Environment: ${env.nodeEnv}`);
       console.log(`[Server] CORS Allowed Origins: ${env.cors.origin.join(', ')}`);
-      console.log(`[Server] Health Endpoint: http://localhost:${env.port}/api/health`);
+      console.log(`[Server] Health Endpoint: /api/health (Port ${env.port})`);
       console.log('====================================================');
     });
 

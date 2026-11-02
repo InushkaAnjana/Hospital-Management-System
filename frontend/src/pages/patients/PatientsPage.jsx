@@ -10,6 +10,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useToast } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 import { patientService } from '../../services/patientService';
+import { getPatientAvatar } from '../../utils/imageAssets';
 
 export const PatientsPage = () => {
   const toast = useToast();
@@ -212,7 +213,24 @@ export const PatientsPage = () => {
 
   const columns = [
     { key: 'patientId', label: 'Patient ID', width: '130px', render: (r) => <span className="badge badge-primary">{r.patientId}</span> },
-    { key: 'name', label: 'Full Name', render: (r) => <div><strong>{r.fullName || `${r.firstName} ${r.lastName}`}</strong><div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.email || 'No email provided'}</div></div> },
+    {
+      key: 'name',
+      label: 'Patient',
+      render: (r, idx) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img
+            src={getPatientAvatar(r._id || r.patientId || idx)}
+            alt={r.fullName || r.firstName}
+            className="avatar-img avatar-img-sm"
+            style={{ width: '36px', height: '36px' }}
+          />
+          <div>
+            <strong style={{ color: 'var(--text-primary)' }}>{r.fullName || `${r.firstName} ${r.lastName}`}</strong>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.email || 'No email registered'}</div>
+          </div>
+        </div>
+      ),
+    },
     { key: 'gender', label: 'Gender', width: '90px' },
     { key: 'age', label: 'Age', width: '70px', render: (r) => `${r.age} yrs` },
     { key: 'phone', label: 'Contact Phone' },
@@ -221,7 +239,7 @@ export const PatientsPage = () => {
       label: 'Blood Group',
       width: '110px',
       render: (r) => (
-        <span className="badge badge-neutral" style={{ fontWeight: 700 }}>
+        <span className="badge" style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', fontWeight: 800 }}>
           {r.bloodGroup}
         </span>
       ),
@@ -577,6 +595,27 @@ export const PatientsPage = () => {
           maxWidth="840px"
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Patient Visual Profile Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', backgroundColor: 'var(--slate-50)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <img
+                src={getPatientAvatar(selectedPatientDetail.patient._id || selectedPatientDetail.patient.patientId)}
+                alt={selectedPatientDetail.patient.fullName}
+                className="avatar-img avatar-img-lg"
+                style={{ width: '64px', height: '64px', borderRadius: '16px' }}
+              />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                    {selectedPatientDetail.patient.fullName}
+                  </h3>
+                  <span className="badge badge-primary">{selectedPatientDetail.patient.patientId}</span>
+                  <span className="badge badge-success">{selectedPatientDetail.patient.status || 'Active'}</span>
+                </div>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                  {selectedPatientDetail.patient.age} yrs • {selectedPatientDetail.patient.gender} • Blood Group: <strong style={{ color: '#b91c1c' }}>{selectedPatientDetail.patient.bloodGroup}</strong> • Phone: {selectedPatientDetail.patient.phone}
+                </div>
+              </div>
+            </div>
             {/* Header info */}
             <div
               style={{

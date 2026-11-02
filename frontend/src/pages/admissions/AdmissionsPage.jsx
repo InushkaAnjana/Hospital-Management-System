@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import { admissionService } from '../../services/admissionService';
 import { patientService } from '../../services/patientService';
 import { doctorService } from '../../services/doctorService';
+import { getPatientAvatar } from '../../utils/imageAssets';
 
 export const AdmissionsPage = () => {
   const toast = useToast();
@@ -218,8 +219,9 @@ export const AdmissionsPage = () => {
     {
       key: 'patient',
       label: 'Patient',
-      render: (r) => (
+      render: (r, idx) => (
         <div>
+          <img src={getPatientAvatar(r.patient?._id || idx)} alt="Patient" className="avatar-img avatar-img-sm" style={{ width: '34px', height: '34px', marginRight: '0.75rem', float: 'left' }} />
           <strong>{r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : 'Inpatient'}</strong>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             {r.patient?.patientId} | {r.patient?.age}y | {r.patient?.bloodGroup}
@@ -230,7 +232,7 @@ export const AdmissionsPage = () => {
     {
       key: 'bed',
       label: 'Ward & Bed',
-      render: (r) => (
+      render: (r, idx) => (
         <div>
           <strong>{r.bedNumber}</strong> ({r.roomNumber})
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.ward}</div>
@@ -240,7 +242,7 @@ export const AdmissionsPage = () => {
     {
       key: 'doctor',
       label: 'Attending Doctor',
-      render: (r) => (r.doctor ? `Dr. ${r.doctor.name}` : 'Duty Physician'),
+      render: (r, idx) => (r.doctor ? `Dr. ${r.doctor.name}` : 'Duty Physician'),
     },
     {
       key: 'admissionDate',
@@ -266,7 +268,7 @@ export const AdmissionsPage = () => {
       label: 'Actions',
       width: '140px',
       align: 'right',
-      render: (r) => (
+      render: (r, idx) => (
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.35rem' }}>
           <button
             className="topbar-icon-btn"

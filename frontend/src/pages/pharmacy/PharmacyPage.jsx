@@ -211,10 +211,27 @@ export const PharmacyPage = () => {
       key: 'name',
       label: 'Medication Name',
       render: (r) => (
-        <div>
-          <strong>{r.name}</strong>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            {r.genericName} • {r.form} ({r.strength})
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--primary-50)',
+              color: 'var(--primary-600)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Pill size={16} />
+          </div>
+          <div>
+            <strong style={{ color: 'var(--text-primary)' }}>{r.name}</strong>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              {r.genericName} • {r.form} ({r.strength})
+            </div>
           </div>
         </div>
       ),

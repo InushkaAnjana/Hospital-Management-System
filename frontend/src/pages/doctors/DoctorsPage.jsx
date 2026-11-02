@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Stethoscope, Plus, Search, Edit3, Trash2, Calendar, Clock, DollarSign } from 'lucide-react';
+import {
+  Stethoscope, Plus, Search, Edit3, Trash2, Calendar, Clock,
+  DollarSign, LayoutGrid, List, Phone, Mail, Award, CheckCircle2
+} from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
 import { Modal, FormGroup, Input, Select, FormGrid } from '../../components/common/FormComponents';
@@ -8,6 +11,7 @@ import { useToast } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 import { doctorService } from '../../services/doctorService';
 import { departmentService } from '../../services/departmentService';
+import { getDoctorAvatar } from '../../utils/imageAssets';
 
 export const DoctorsPage = () => {
   const toast = useToast();
@@ -18,6 +22,7 @@ export const DoctorsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -141,17 +146,25 @@ export const DoctorsPage = () => {
   };
 
   const columns = [
-    { key: 'doctorCode', label: 'Doctor ID', width: '110px', render: (r) => <span className="badge badge-primary">{r.doctorCode}</span> },
     {
       key: 'name',
-      label: 'Consultant Name',
-      render: (r) => (
-        <div>
-          <strong>{r.name}</strong>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.qualifications}</div>
+      label: 'Consultant',
+      render: (r, idx) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img
+            src={getDoctorAvatar(r._id || idx)}
+            alt={r.name}
+            className="avatar-img avatar-img-sm"
+            style={{ width: '38px', height: '38px' }}
+          />
+          <div>
+            <strong style={{ color: 'var(--text-primary)' }}>{r.name}</strong>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.qualifications}</div>
+          </div>
         </div>
       ),
     },
+    { key: 'doctorCode', label: 'Doctor ID', width: '110px', render: (r) => <span className="badge badge-primary">{r.doctorCode}</span> },
     { key: 'specialization', label: 'Specialization' },
     {
       key: 'department',
@@ -226,52 +239,182 @@ export const DoctorsPage = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <PageHeader
-        title="Doctor Directory & Schedules"
-        subtitle="Specialist consultants, clinical departments, and weekly working rosters."
+        title="Doctor Directory & Specialist Roster"
+        subtitle="Consultants, clinical departments, weekly OPD clinic timings, and consultation fees."
         icon={Stethoscope}
         breadcrumbs={[{ label: 'Doctors' }]}
-        badge="Live Staff"
+        badge="Active Specialists"
         actions={
           hasRole('Administrator') && (
             <button className="btn btn-primary btn-sm" onClick={handleOpenAdd}>
-              <Plus size={15} /> Add Doctor
+              <Plus size={15} /> Add Specialist
             </button>
           )
         }
       />
 
-      {/* Filter Toolbar */}
+      {/* Filter & View Mode Toolbar */}
       <div className="card" style={{ padding: '0.875rem 1.25rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
-            <Search size={16} color="var(--slate-400)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
-            <input
-              type="text"
-              className="form-input"
-              style={{ width: '100%', paddingLeft: '2.5rem' }}
-              placeholder="Search doctor by name, specialty..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: '1rem', flex: 1, minWidth: '280px', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+              <Search size={16} color="var(--slate-400)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
+              <input
+                type="text"
+                className="form-input"
+                style={{ width: '100%', paddingLeft: '2.5rem' }}
+                placeholder="Search doctor by name, specialty..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div style={{ minWidth: '180px' }}>
+              <select
+                className="form-select"
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+              >
+                <option value="">All Departments</option>
+                {departments.map((d) => (
+                  <option key={d._id} value={d._id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div style={{ minWidth: '180px' }}>
-            <select
-              className="form-select"
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
+          {/* Grid vs Table Switch */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', backgroundColor: 'var(--slate-100)', padding: '3px', borderRadius: 'var(--radius-md)' }}>
+            <button
+              className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : ''}`}
+              style={{ padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-sm)' }}
+              onClick={() => setViewMode('grid')}
+              title="Card View"
             >
-              <option value="">All Departments</option>
-              {departments.map((d) => (
-                <option key={d._id} value={d._id}>{d.name}</option>
-              ))}
-            </select>
+              <LayoutGrid size={15} /> Cards
+            </button>
+            <button
+              className={`btn btn-sm ${viewMode === 'table' ? 'btn-primary' : ''}`}
+              style={{ padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-sm)' }}
+              onClick={() => setViewMode('table')}
+              title="Table View"
+            >
+              <List size={15} /> Table
+            </button>
           </div>
         </div>
       </div>
 
       {loading ? (
         <LoadingSpinner message="Fetching doctors..." />
+      ) : viewMode === 'grid' ? (
+        <div className="doctors-grid">
+          {doctors.map((doc, idx) => {
+            const avatar = getDoctorAvatar(doc._id || idx);
+            return (
+              <div key={doc._id || idx} className="doctor-card">
+                <div className="doctor-card-banner">
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '12px',
+                      backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                      color: 'white',
+                      backdropFilter: 'blur(6px)',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {doc.doctorCode}
+                  </span>
+                </div>
+
+                <div className="doctor-card-body">
+                  <div className="doctor-avatar-wrap">
+                    <div style={{ position: 'relative' }}>
+                      <img src={avatar} alt={doc.name} className="doctor-avatar" />
+                      <span
+                        style={{
+                          position: 'absolute',
+                          bottom: '3px',
+                          right: '3px',
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          backgroundColor: doc.status === 'Available' ? '#10b981' : '#f59e0b',
+                          border: '2px solid white',
+                        }}
+                      />
+                    </div>
+                    <span className={`badge ${doc.status === 'Available' ? 'badge-success' : 'badge-neutral'}`}>
+                      {doc.status}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="doctor-card-name">{doc.name}</h3>
+                    <div className="doctor-card-specialty">{doc.specialization}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      {doc.qualifications} • {doc.department?.name || 'Department'}
+                    </div>
+                  </div>
+
+                  <div className="doctor-meta-row">
+                    <div className="doctor-meta-item">
+                      <span className="doctor-meta-label">Experience</span>
+                      <span className="doctor-meta-value">{doc.experienceYears || 5} Years</span>
+                    </div>
+                    <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-subtle)' }} />
+                    <div className="doctor-meta-item">
+                      <span className="doctor-meta-label">Fee</span>
+                      <span className="doctor-meta-value" style={{ color: 'var(--success-600)' }}>
+                        ${doc.consultationFee?.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                      OPD Clinic Days
+                    </div>
+                    <div className="doctor-days-row">
+                      {doc.availableDays?.map((d, i) => (
+                        <span key={i} className="doctor-day-pill">
+                          {d.slice(0, 3)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="doctor-card-actions">
+                    {hasRole('Administrator', 'Doctor') && (
+                      <button
+                        className="btn btn-outline btn-sm"
+                        style={{ flex: 1 }}
+                        onClick={() => handleOpenEdit(doc)}
+                      >
+                        <Edit3 size={13} /> Edit Roster
+                      </button>
+                    )}
+                    {hasRole('Administrator') && (
+                      <button
+                        className="btn btn-outline btn-sm"
+                        style={{ color: 'var(--danger-600)', borderColor: 'var(--danger-light)' }}
+                        onClick={() => handleDelete(doc)}
+                        title="Delete Doctor"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
         <DataTable
           columns={columns}

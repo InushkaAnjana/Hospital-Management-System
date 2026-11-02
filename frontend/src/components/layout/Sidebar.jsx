@@ -4,12 +4,14 @@ import {
   Activity, LayoutDashboard, Users, UserPlus, Building2,
   Calendar, FileText, FlaskConical, Pill, Receipt,
   Bed, ShieldCheck, BarChart3, ChevronLeft, ChevronRight, Stethoscope,
-  UserCheck
+  UserCheck, HeartPulse
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getRoleAvatar } from '../../utils/imageAssets';
 
 export const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onCloseMobile }) => {
   const { user } = useAuth();
+  const avatarUrl = getRoleAvatar(user?.role);
 
   const navSections = [
     {
@@ -54,28 +56,32 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onCloseMo
     },
   ];
 
-  const getInitials = (name) => {
-    if (!name) return 'AD';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
-  };
-
   return (
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
       {/* Brand Header */}
       <div className="sidebar-header">
         <div className="sidebar-brand">
-          <div className="sidebar-brand-icon">
+          <div className="sidebar-brand-icon" style={{ position: 'relative' }}>
             <Activity size={22} strokeWidth={2.5} />
+            <span
+              style={{
+                position: 'absolute',
+                top: '-2px',
+                right: '-2px',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: '#10b981',
+                boxShadow: '0 0 6px #10b981',
+              }}
+            />
           </div>
           {!isCollapsed && (
             <div>
               <div className="sidebar-brand-title">CarePulse</div>
-              <div className="sidebar-brand-badge">Hospital System</div>
+              <div className="sidebar-brand-badge" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span className="live-pulse-dot" style={{ width: '5px', height: '5px' }} /> HMS Cloud OS
+              </div>
             </div>
           )}
         </div>
@@ -92,7 +98,6 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onCloseMo
       {/* Nav List */}
       <div className="sidebar-nav-container">
         {navSections.map((section, sIdx) => {
-          // Filter items based on user role
           const visibleItems = section.items.filter(
             (item) => !item.roles || (user && (user.role === 'Administrator' || item.roles.includes(user.role)))
           );
@@ -128,16 +133,51 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onCloseMo
         })}
       </div>
 
-      {/* Footer Profile Preview */}
+      {/* Footer Profile Preview with Picture */}
       <div className="sidebar-footer">
-        <div className="sidebar-user-card">
-          <div className="sidebar-user-avatar">
-            {getInitials(user?.name)}
+        <div className="sidebar-user-card" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <img
+              src={avatarUrl}
+              alt={user?.name || 'User'}
+              className="avatar-img avatar-img-sm"
+              style={{ width: '38px', height: '38px', borderRadius: '10px' }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                bottom: '-2px',
+                right: '-2px',
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: '#10b981',
+                border: '2px solid #0f172a',
+              }}
+              title="Online"
+            />
           </div>
           {!isCollapsed && (
-            <div className="sidebar-user-info">
-              <div className="sidebar-user-name">{user?.name || 'Hospital Admin'}</div>
-              <div className="sidebar-user-role">{user?.role || 'Administrator'}</div>
+            <div className="sidebar-user-info" style={{ overflow: 'hidden' }}>
+              <div
+                className="sidebar-user-name"
+                style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              >
+                {user?.name || 'Hospital Staff'}
+              </div>
+              <div
+                className="sidebar-user-role"
+                style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--primary-400)',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {user?.role || 'Administrator'}
+              </div>
             </div>
           )}
         </div>

@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import { appointmentService } from '../../services/appointmentService';
 import { doctorService } from '../../services/doctorService';
 import { patientService } from '../../services/patientService';
+import { getPatientAvatar, getDoctorAvatar } from '../../utils/imageAssets';
 
 export const AppointmentsPage = () => {
   const toast = useToast();
@@ -170,8 +171,13 @@ export const AppointmentsPage = () => {
       label: 'Patient Name',
       render: (r) => (
         <div>
-          <strong>{r.patient?.firstName} {r.patient?.lastName}</strong>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.patient?.patientId} • {r.patient?.phone}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <img src={getPatientAvatar(r.patient?._id)} alt="Patient" className="avatar-img avatar-img-sm" style={{ width: '32px', height: '32px' }} />
+            <div>
+              <strong>{r.patient?.firstName} {r.patient?.lastName}</strong>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.patient?.patientId} • {r.patient?.phone}</div>
+            </div>
+          </div>
         </div>
       ),
     },
@@ -180,8 +186,13 @@ export const AppointmentsPage = () => {
       label: 'Doctor',
       render: (r) => (
         <div>
-          <strong>{r.doctor?.name}</strong>
-          <div style={{ fontSize: '0.75rem', color: 'var(--primary-700)' }}>{r.doctor?.specialization}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <img src={getDoctorAvatar(r.doctor?._id)} alt="Doctor" className="avatar-img avatar-img-sm" style={{ width: '32px', height: '32px' }} />
+            <div>
+              <strong>{r.doctor?.name}</strong>
+              <div style={{ fontSize: '0.75rem', color: 'var(--primary-700)' }}>{r.doctor?.specialization}</div>
+            </div>
+          </div>
         </div>
       ),
     },

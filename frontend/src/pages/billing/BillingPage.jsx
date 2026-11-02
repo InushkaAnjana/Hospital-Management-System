@@ -11,6 +11,7 @@ import { useToast } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 import { billingService } from '../../services/billingService';
 import { patientService } from '../../services/patientService';
+import { getPatientAvatar } from '../../utils/imageAssets';
 
 export const BillingPage = () => {
   const toast = useToast();
@@ -212,6 +213,7 @@ export const BillingPage = () => {
       label: 'Patient',
       render: (r) => (
         <div>
+          <img src={getPatientAvatar(r.patient?._id)} alt="Patient" className="avatar-img avatar-img-sm" style={{ width: '34px', height: '34px', marginRight: '0.75rem', float: 'left' }} />
           <strong>{r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : 'Walk-in Patient'}</strong>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             {r.patient?.patientId} | {r.patient?.phone}
